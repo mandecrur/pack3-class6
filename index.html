@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Práctica — Clase 6 | Pack 3 | EBR Secundaria Inglés</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Times New Roman', Times, serif; background: #f5f5f0; color: #1a1a1a; font-size: 15px; line-height: 1.6; }
+  .cover { background: #1a3a6b; color: #fff; display: flex; flex-direction: column; min-height: 140px; }
+  .cover-top { display: flex; align-items: center; gap: 18px; padding: 22px 40px 16px; border-bottom: 3px solid #c8a84b; }
+  .cover-logo { width: 52px; height: 52px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 22px; font-weight: 900; color: #1a3a6b; font-family: Arial, sans-serif; letter-spacing: -1px; }
+  .cover-title { flex: 1; }
+  .cover-title h1 { font-family: Arial, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #c8a84b; margin-bottom: 3px; }
+  .cover-title h2 { font-family: Arial, sans-serif; font-size: 17px; font-weight: 700; color: #fff; }
+  .cover-bottom { display: flex; align-items: center; justify-content: space-between; padding: 10px 40px; background: #122d57; font-family: Arial, sans-serif; font-size: 12px; color: #a8c0e0; }
+  .instructions { background: #fff; border-left: 4px solid #1a3a6b; margin: 28px 40px 0; padding: 16px 20px; font-family: Arial, sans-serif; font-size: 13px; color: #333; }
+  .instructions strong { color: #1a3a6b; }
+  .progress-wrap { margin: 20px 40px 0; font-family: Arial, sans-serif; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 6px; }
+  .progress-bar { height: 6px; background: #ddd; border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #1a3a6b; border-radius: 3px; transition: width 0.4s ease; width: 0%; }
+  .score-strip { display: flex; gap: 12px; margin: 16px 40px 0; font-family: Arial, sans-serif; }
+  .score-pill { flex: 1; padding: 8px 14px; border-radius: 4px; font-size: 12px; text-align: center; border: 1px solid #ddd; background: #fff; color: #555; }
+  .score-pill span { display: block; font-size: 20px; font-weight: 700; color: #1a3a6b; }
+  .score-pill.correct span { color: #1a7a3a; }
+  .score-pill.wrong span { color: #c0392b; }
+  .question-section { margin: 24px 40px 0; }
+  .section-label { font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #1a3a6b; border-bottom: 1px solid #c8a84b; padding-bottom: 5px; margin-bottom: 16px; }
+  .q-card { background: #fff; border: 1px solid #d0d0d0; margin-bottom: 2px; display: none; }
+  .q-card.active { display: block; }
+  .q-header { display: flex; align-items: flex-start; border-bottom: 1px solid #e8e8e8; }
+  .q-number { background: #1a3a6b; color: #fff; font-family: Arial, sans-serif; font-size: 13px; font-weight: 700; min-width: 42px; padding: 14px 0; text-align: center; flex-shrink: 0; align-self: stretch; display: flex; align-items: center; justify-content: center; }
+  .q-body { padding: 16px 20px 18px; flex: 1; }
+  .q-stem { font-size: 14.5px; line-height: 1.65; margin-bottom: 14px; color: #111; }
+  .q-stem em { font-style: italic; color: #2a4a8a; }
+  .q-stem strong { font-weight: 700; }
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .option { display: flex; align-items: flex-start; border: 1px solid #ccc; cursor: pointer; transition: background 0.12s, border-color 0.12s; user-select: none; }
+  .option:hover:not(.locked) { background: #eef2f9; border-color: #1a3a6b; }
+  .opt-letter { background: #f0f0f0; border-right: 1px solid #ccc; font-family: Arial, sans-serif; font-size: 13px; font-weight: 700; min-width: 38px; padding: 10px 0; text-align: center; flex-shrink: 0; color: #333; align-self: stretch; display: flex; align-items: center; justify-content: center; transition: background 0.12s; }
+  .opt-text { padding: 10px 14px; font-size: 13.5px; line-height: 1.55; color: #1a1a1a; flex: 1; }
+  .opt-text em { font-style: italic; color: #2a4a8a; }
+  .option.correct { background: #e6f4eb; border-color: #1a7a3a; }
+  .option.correct .opt-letter { background: #1a7a3a; color: #fff; border-color: #1a7a3a; }
+  .option.wrong { background: #fdecea; border-color: #c0392b; }
+  .option.wrong .opt-letter { background: #c0392b; color: #fff; border-color: #c0392b; }
+  .option.reveal { background: #e6f4eb; border-color: #1a7a3a; }
+  .option.reveal .opt-letter { background: #1a7a3a; color: #fff; border-color: #1a7a3a; }
+  .option.locked { cursor: default; }
+  .feedback { display: none; margin-top: 14px; border-top: 2px solid #c8a84b; padding-top: 12px; }
+  .feedback.show { display: block; }
+  .feedback-header { font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .feedback-header.ok { color: #1a7a3a; }
+  .feedback-header.fail { color: #c0392b; }
+  .feedback-body { font-size: 13.5px; line-height: 1.65; color: #222; background: #fffdf0; border-left: 3px solid #c8a84b; padding: 10px 14px; }
+  .nav-row { display: flex; align-items: center; justify-content: space-between; margin: 20px 40px 0; gap: 12px; font-family: Arial, sans-serif; }
+  .btn { padding: 9px 22px; font-family: Arial, sans-serif; font-size: 13px; font-weight: 700; border: 2px solid #1a3a6b; background: transparent; color: #1a3a6b; cursor: pointer; letter-spacing: 0.5px; transition: background 0.15s, color 0.15s; text-transform: uppercase; }
+  .btn:hover { background: #1a3a6b; color: #fff; }
+  .btn.primary { background: #1a3a6b; color: #fff; }
+  .btn.primary:hover { background: #122d57; }
+  .btn:disabled { opacity: 0.35; cursor: default; }
+  .btn:disabled:hover { background: transparent; color: #1a3a6b; }
+  .dot-nav { display: flex; gap: 6px; flex-wrap: wrap; margin: 16px 40px 0; }
+  .dot { width: 32px; height: 32px; border: 2px solid #ccc; background: #fff; font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #555; transition: all 0.15s; }
+  .dot:hover { border-color: #1a3a6b; color: #1a3a6b; }
+  .dot.active { border-color: #1a3a6b; background: #1a3a6b; color: #fff; }
+  .dot.answered-ok { border-color: #1a7a3a; background: #e6f4eb; color: #1a7a3a; }
+  .dot.answered-fail { border-color: #c0392b; background: #fdecea; color: #c0392b; }
+  .final { display: none; margin: 28px 40px 0; background: #fff; border: 1px solid #d0d0d0; padding: 36px 32px; text-align: center; font-family: Arial, sans-serif; }
+  .final.show { display: block; }
+  .final-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #1a3a6b; margin-bottom: 6px; }
+  .final-score { font-size: 56px; font-weight: 700; color: #1a3a6b; line-height: 1; margin: 10px 0 4px; }
+  .final-total { font-size: 14px; color: #666; margin-bottom: 6px; }
+  .final-pct { font-size: 28px; font-weight: 700; color: #c8a84b; margin-bottom: 16px; }
+  .final-msg { font-size: 14px; color: #333; margin-bottom: 24px; line-height: 1.6; }
+  .final-grid { display: flex; gap: 12px; justify-content: center; margin-bottom: 28px; }
+  .final-cell { padding: 12px 20px; border: 1px solid #ddd; min-width: 90px; font-size: 12px; color: #666; }
+  .final-cell span { display: block; font-size: 26px; font-weight: 700; margin-bottom: 2px; }
+  .final-cell.ok span { color: #1a7a3a; }
+  .final-cell.fail span { color: #c0392b; }
+  .page-footer { display: flex; justify-content: space-between; align-items: center; margin: 32px 40px 0; padding: 12px 0; border-top: 1px solid #ccc; font-family: Arial, sans-serif; font-size: 11px; color: #999; }
+  @media (max-width: 600px) {
+    .cover-top, .cover-bottom, .instructions, .progress-wrap, .score-strip, .question-section, .nav-row, .dot-nav, .final, .page-footer { margin-left: 16px; margin-right: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="cover-top">
+    <div class="cover-logo">M</div>
+    <div class="cover-title">
+      <h1>Práctica de Evaluación Docente</h1>
+      <h2>Clase 6 — Gestión de los Aprendizajes y Procesos Auxiliares</h2>
+    </div>
+  </div>
+  <div class="cover-bottom">
+    <span>&#9632; EBR Secundaria &nbsp;|&nbsp; Inglés como Lengua Extranjera</span>
+    <span>Pack 3 &nbsp;|&nbsp; Preguntas 11–15</span>
+  </div>
+</div>
+
+<div class="instructions">
+  <strong>Instrucciones:</strong> Lee cada situación con atención y selecciona la opción correcta. Al marcar una respuesta verás la explicación correspondiente. Puedes navegar entre preguntas usando los botones o los cuadros numerados.
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-meta">
+    <span id="progLabel">Pregunta 11 de 15</span>
+    <span id="progPct">0% completado</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+</div>
+
+<div class="score-strip">
+  <div class="score-pill"><span id="scoreTotal">0</span>Respondidas</div>
+  <div class="score-pill correct"><span id="scoreOk">0</span>Correctas</div>
+  <div class="score-pill wrong"><span id="scoreFail">0</span>Incorrectas</div>
+</div>
+
+<div class="dot-nav" id="dotNav"></div>
+
+<div class="question-section">
+  <div class="section-label">Casuísticas de práctica</div>
+
+  <!-- Q11 -->
+  <div class="q-card active" id="q11">
+    <div class="q-header">
+      <div class="q-number">11</div>
+      <div class="q-body">
+        <div class="q-stem">
+          Students have practised ordering food in English using the expression <em>"I would like a sandwich, please"</em> during several lessons. Now, their teacher sets up a simulated fast-food restaurant in the classroom and students must use those same expressions to place their orders. What type of transfer does this activity promote?
+        </div>
+        <div class="options" data-correct="b">
+          <div class="option" data-opt="a" onclick="pick(11,'a')">
+            <div class="opt-letter">A</div>
+            <div class="opt-text">Far transfer, because the simulated restaurant is a completely different context from the one used during practice.</div>
+          </div>
+          <div class="option" data-opt="b" onclick="pick(11,'b')">
+            <div class="opt-letter">B</div>
+            <div class="opt-text">Near transfer, because the context (ordering food) is similar to the one in which the language was originally practised.</div>
+          </div>
+          <div class="option" data-opt="c" onclick="pick(11,'c')">
+            <div class="opt-letter">C</div>
+            <div class="opt-text">Metacognitive transfer, because students reflect on how they use the language in a new situation.</div>
+          </div>
+        </div>
+        <div class="feedback" id="fb11">
+          <div class="feedback-header" id="fbh11"></div>
+          <div class="feedback-body">
+            Perkins y Salomon (1992) distinguen entre <strong>transferencia cercana</strong> (<em>near transfer</em>: aplicación en un contexto <em>similar</em> al de aprendizaje) y <strong>transferencia lejana</strong> (<em>far transfer</em>: aplicación en un contexto <em>bastante diferente</em>). El role-play del restaurante dentro del aula sigue siendo un contexto muy similar al de práctica original; por tanto, corresponde a transferencia cercana. La "metacognitive transfer" no es una categoría reconocida en la literatura de referencia.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q12 -->
+  <div class="q-card" id="q12">
+    <div class="q-header">
+      <div class="q-number">12</div>
+      <div class="q-body">
+        <div class="q-stem">
+          Carmen's students learned how to introduce themselves in English: <em>"Hi, my name is... I'm from... I like..."</em> All of them perform perfectly in the written exercises. However, when a foreign volunteer visits the school, none of them manages to introduce themselves spontaneously. Which problem does this situation reveal?
+        </div>
+        <div class="options" data-correct="b">
+          <div class="option" data-opt="a" onclick="pick(12,'a')">
+            <div class="opt-letter">A</div>
+            <div class="opt-text">A failure in sustained attention, because students did not focus during the lessons.</div>
+          </div>
+          <div class="option" data-opt="b" onclick="pick(12,'b')">
+            <div class="opt-letter">B</div>
+            <div class="opt-text">Absence of functional transfer, because the knowledge remained tied to the written practice context and was not mobilised toward a real communicative situation.</div>
+          </div>
+          <div class="option" data-opt="c" onclick="pick(12,'c')">
+            <div class="opt-letter">C</div>
+            <div class="opt-text">A retrieval failure, because students cannot recall the expressions stored in their long-term memory.</div>
+          </div>
+        </div>
+        <div class="feedback" id="fb12">
+          <div class="feedback-header" id="fbh12"></div>
+          <div class="feedback-body">
+            Perkins y Salomon (1992) señalan que la <strong>transferencia lejana</strong> es menos frecuente y requiere enseñanza deliberada. Los alumnos dominan los ejercicios escritos, lo que descarta problemas de atención o recuperación. El problema es que el aprendizaje <em>no se movilizó</em> hacia la comunicación auténtica con un hablante real: no hubo <strong>transferencia funcional</strong>. Esta es la señal de alerta más importante para el docente de inglés.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q13 -->
+  <div class="q-card" id="q13">
+    <div class="q-header">
+      <div class="q-number">13</div>
+      <div class="q-body">
+        <div class="q-stem">
+          Read Marco's teaching sequence for a dialogue unit on professions:
+          <br><br>
+          &nbsp;&nbsp;• <strong>Session 1:</strong> He displays a complete model dialogue on the board for students to read and repeat.<br>
+          &nbsp;&nbsp;• <strong>Session 2:</strong> He provides a gapped outline for students to complete with their own information.<br>
+          &nbsp;&nbsp;• <strong>Session 3:</strong> He asks students to create their own original dialogue with no support at all.
+          <br><br>
+          Which pedagogical strategy does this sequence describe?
+        </div>
+        <div class="options" data-correct="c">
+          <div class="option" data-opt="a" onclick="pick(13,'a')">
+            <div class="opt-letter">A</div>
+            <div class="opt-text">Metacognitive evaluation, because students assess their own performance at the end of each session.</div>
+          </div>
+          <div class="option" data-opt="b" onclick="pick(13,'b')">
+            <div class="opt-letter">B</div>
+            <div class="opt-text">Far transfer, because students apply the dialogue to increasingly different contexts.</div>
+          </div>
+          <div class="option" data-opt="c" onclick="pick(13,'c')">
+            <div class="opt-letter">C</div>
+            <div class="opt-text">Scaffolding, because Marco provides regulated and decreasing support until students achieve full autonomy.</div>
+          </div>
+        </div>
+        <div class="feedback" id="fb13">
+          <div class="feedback-header" id="fbh13"></div>
+          <div class="feedback-body">
+            El <strong>scaffolding</strong> (Wood, Bruner y Ross, 1976) es el soporte <em>temporal y decreciente</em> que guía al estudiante a través de su Zona de Desarrollo Próximo (Vygotsky, 1978) hasta alcanzar la autonomía. La secuencia de Marco sigue exactamente ese patrón: <strong>máximo apoyo → apoyo parcial → producción libre</strong>. No es transferencia porque los contextos no cambian sustancialmente; no es evaluación metacognitiva porque no se pide reflexión sobre el proceso.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q14 -->
+  <div class="q-card" id="q14">
+    <div class="q-header">
+      <div class="q-number">14</div>
+      <div class="q-body">
+        <div class="q-stem">
+          Throughout the entire school year, Beatriz always gives her students a sentence frame to produce any oral or written task. She never withdraws this support. What pedagogical problem does Beatriz's practice generate?
+        </div>
+        <div class="options" data-correct="b">
+          <div class="option" data-opt="a" onclick="pick(14,'a')">
+            <div class="opt-letter">A</div>
+            <div class="opt-text">It activates the alerting network of the attentional system, keeping students dependent on visual stimuli.</div>
+          </div>
+          <div class="option" data-opt="b" onclick="pick(14,'b')">
+            <div class="opt-letter">B</div>
+            <div class="opt-text">It generates permanent dependence on the teacher, preventing students from reaching the autonomy that is the ultimate goal of scaffolding.</div>
+          </div>
+          <div class="option" data-opt="c" onclick="pick(14,'c')">
+            <div class="opt-letter">C</div>
+            <div class="opt-text">It promotes extrinsic motivation, since students only produce language when a frame is provided.</div>
+          </div>
+        </div>
+        <div class="feedback" id="fb14">
+          <div class="feedback-header" id="fbh14"></div>
+          <div class="feedback-body">
+            El andamiaje debe ser <strong>temporal y retirarse progresivamente</strong> (Wood, Bruner y Ross, 1976). Si el soporte nunca se retira, el alumno no transita por su ZPD hacia la autonomía: se genera <strong>dependencia permanente</strong> en el docente. Este es uno de los dos errores clásicos del scaffolding: el otro es retirarlo demasiado pronto. Ninguna de las otras opciones describe correctamente las consecuencias pedagógicas de esta práctica.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q15 -->
+  <div class="q-card" id="q15">
+    <div class="q-header">
+      <div class="q-number">15</div>
+      <div class="q-body">
+        <div class="q-stem">
+          Rosa is teaching her beginner students to write emails in English. From the very first session, she asks them to write a complete formal email independently, with no model or language support. Most students are unable to complete the task and become frustrated. What mistake has Rosa made?
+        </div>
+        <div class="options" data-correct="b">
+          <div class="option" data-opt="a" onclick="pick(15,'a')">
+            <div class="opt-letter">A</div>
+            <div class="opt-text">She activated far transfer too early, before students had consolidated the language in a familiar context.</div>
+          </div>
+          <div class="option" data-opt="b" onclick="pick(15,'b')">
+            <div class="opt-letter">B</div>
+            <div class="opt-text">She withdrew the scaffolding too soon, asking for full autonomous production before students had mastered the basic structures.</div>
+          </div>
+          <div class="option" data-opt="c" onclick="pick(15,'c')">
+            <div class="opt-letter">C</div>
+            <div class="opt-text">She failed to promote intrinsic motivation, since the email task had no authentic communicative purpose for the students.</div>
+          </div>
+        </div>
+        <div class="feedback" id="fb15">
+          <div class="feedback-header" id="fbh15"></div>
+          <div class="feedback-body">
+            El error opuesto al de nunca retirar el andamiaje es <strong>retirarlo demasiado pronto</strong>. Rosa exige producción libre <em>desde la primera sesión</em>, sin haber provisto un modelo completo ni apoyo parcial previo. Esto supera la Zona de Desarrollo Próximo de los alumnos y genera frustración. El scaffolding correcto sigue la secuencia: modelo completo → apoyo parcial → autonomía. No es un problema de transferencia ni de motivación.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FINAL -->
+<div class="final" id="finalScreen">
+  <div class="final-title">Resultado del simulacro</div>
+  <div class="final-score" id="finalScore">0</div>
+  <div class="final-total">de 5 preguntas</div>
+  <div class="final-pct" id="finalPct">0%</div>
+  <div class="final-msg" id="finalMsg"></div>
+  <div class="final-grid">
+    <div class="final-cell ok"><span id="fOk">0</span>Correctas</div>
+    <div class="final-cell fail"><span id="fFail">0</span>Incorrectas</div>
+    <div class="final-cell"><span id="fPct">0%</span>Puntaje</div>
+  </div>
+  <button class="btn primary" onclick="restart()">&#8635; Reintentar</button>
+</div>
+
+<div class="nav-row" id="navRow">
+  <button class="btn" id="btnPrev" onclick="go(-1)" disabled>&#8592; Anterior</button>
+  <span id="navInfo" style="font-family:Arial,sans-serif;font-size:12px;color:#666;"></span>
+  <button class="btn primary" id="btnNext" onclick="go(1)">Siguiente &#8594;</button>
+</div>
+
+<div class="page-footer">
+  <span>Clase 6 — Pack 3</span>
+  <span>A-C6-P3 | EBR Secundaria Inglés</span>
+</div>
+
+<script>
+const QUESTIONS = [11,12,13,14,15];
+const TOTAL = 5;
+const CORRECT = { 11:'b', 12:'b', 13:'c', 14:'b', 15:'b' };
+
+let current = 11;
+let answered = {};
+let results  = {};
+
+function init() {
+  const dn = document.getElementById('dotNav');
+  dn.innerHTML = '';
+  QUESTIONS.forEach(n => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (n === QUESTIONS[0] ? ' active' : '');
+    d.id = 'dot' + n;
+    d.textContent = n;
+    d.onclick = () => jumpTo(n);
+    dn.appendChild(d);
+  });
+  updateUI();
+}
+
+function pick(qNum, opt) {
+  if (answered[qNum] !== undefined) return;
+  answered[qNum] = opt;
+  const correct = CORRECT[qNum];
+  const isOk = opt === correct;
+  results[qNum] = isOk;
+
+  document.getElementById('q' + qNum).querySelectorAll('.option').forEach(o => {
+    o.classList.add('locked');
+    const v = o.getAttribute('data-opt');
+    if (v === opt && isOk)      o.classList.add('correct');
+    if (v === opt && !isOk)     o.classList.add('wrong');
+    if (v === correct && !isOk) o.classList.add('reveal');
+  });
+
+  const fbh = document.getElementById('fbh' + qNum);
+  fbh.textContent = isOk ? '✓ Respuesta correcta' : '✗ Respuesta incorrecta — Revisión';
+  fbh.className   = 'feedback-header ' + (isOk ? 'ok' : 'fail');
+  document.getElementById('fb' + qNum).classList.add('show');
+
+  const dot = document.getElementById('dot' + qNum);
+  dot.classList.remove('answered-ok','answered-fail');
+  dot.classList.add(isOk ? 'answered-ok' : 'answered-fail');
+
+  updateScores();
+  updateUI();
+}
+
+function go(dir) {
+  const idx  = QUESTIONS.indexOf(current);
+  const next = QUESTIONS[idx + dir];
+  if (next !== undefined) jumpTo(next);
+}
+
+function jumpTo(n) {
+  document.getElementById('q' + current).classList.remove('active');
+  document.getElementById('dot' + current).classList.remove('active');
+  current = n;
+  document.getElementById('q' + current).classList.add('active');
+  document.getElementById('dot' + current).classList.add('active');
+  updateUI();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateUI() {
+  const done = Object.keys(answered).length;
+  const pct  = Math.round((done / TOTAL) * 100);
+  const idx  = QUESTIONS.indexOf(current);
+
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progLabel').textContent = 'Pregunta ' + current + ' de 15';
+  document.getElementById('progPct').textContent   = pct + '% completado';
+  document.getElementById('btnPrev').disabled = (idx === 0);
+
+  const isLast  = idx === QUESTIONS.length - 1;
+  const btnNext = document.getElementById('btnNext');
+  if (isLast) {
+    btnNext.textContent = 'Ver resultado ↗';
+    btnNext.onclick = showFinal;
+  } else {
+    btnNext.textContent = 'Siguiente →';
+    btnNext.onclick = () => go(1);
+  }
+
+  const unanswered = TOTAL - done;
+  document.getElementById('navInfo').textContent = unanswered > 0
+    ? unanswered + ' sin responder'
+    : '¡Todas respondidas!';
+}
+
+function updateScores() {
+  const done = Object.keys(answered).length;
+  const ok   = Object.values(results).filter(Boolean).length;
+  document.getElementById('scoreTotal').textContent = done;
+  document.getElementById('scoreOk').textContent    = ok;
+  document.getElementById('scoreFail').textContent  = done - ok;
+}
+
+function showFinal() {
+  document.querySelectorAll('.q-card').forEach(c => c.style.display = 'none');
+  document.getElementById('navRow').style.display = 'none';
+  document.getElementById('dotNav').style.display = 'none';
+
+  const ok   = Object.values(results).filter(Boolean).length;
+  const fail = TOTAL - ok;
+  const pct  = Math.round((ok / TOTAL) * 100);
+
+  const msgs = [
+    [100, '¡Perfecto! Dominio completo de los temas de este pack.'],
+    [80,  'Muy bien. Repasa los ítems marcados en rojo para consolidar.'],
+    [60,  'Avance aceptable. Revisa la teoría de los procesos que fallaron.'],
+    [0,   'Necesitas repasar la Clase 6 antes de continuar. ¡Tú puedes!']
+  ];
+  const msg = msgs.find(([min]) => pct >= min)[1];
+
+  document.getElementById('finalScore').textContent = ok;
+  document.getElementById('finalPct').textContent   = pct + '%';
+  document.getElementById('finalMsg').textContent   = msg;
+  document.getElementById('fOk').textContent   = ok;
+  document.getElementById('fFail').textContent = fail;
+  document.getElementById('fPct').textContent  = pct + '%';
+  document.getElementById('finalScreen').classList.add('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restart() {
+  answered = {}; results = {}; current = QUESTIONS[0];
+  document.getElementById('finalScreen').classList.remove('show');
+  document.querySelectorAll('.q-card').forEach((c, i) => {
+    c.style.display = '';
+    c.classList.toggle('active', i === 0);
+    c.querySelectorAll('.option').forEach(o =>
+      o.classList.remove('correct','wrong','reveal','locked'));
+    const fb  = c.querySelector('.feedback');
+    const fbh = c.querySelector('.feedback-header');
+    if (fb)  fb.classList.remove('show');
+    if (fbh) fbh.className = 'feedback-header';
+  });
+  document.getElementById('navRow').style.display = '';
+  document.getElementById('dotNav').style.display = '';
+  document.getElementById('scoreTotal').textContent = '0';
+  document.getElementById('scoreOk').textContent    = '0';
+  document.getElementById('scoreFail').textContent  = '0';
+  init();
+}
+
+init();
+</script>
+</body>
+</html>
